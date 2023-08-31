@@ -1,0 +1,15 @@
+{
+    "build": {"dockerfile": "Dockerfile", "args": {"USER": "${localEnv:USER}"}},  // UID and GID will be updated on container startup by vscode
+    "containerEnv": {"DISPLAY": "${localEnv:DISPLAY}"},
+    "runArgs": ["--net=host", "--gpus", "all"],
+    "customizations": {
+        "vscode": {
+          "extensions": ["ms-python.python", "ms-azuretools.vscode-docker", "ms-python.pylint", "usernamehw.errorlens"]
+        }
+    },
+    "mounts": [
+      "source=${localEnv:HOME},target=${localEnv:HOME},type=bind,consistency=cached",
+      "source=${localEnv:HOME}/clearml.conf,target=/workspace/home/clearml.conf,type=bind,consistency=cached",
+      "source=${localEnv:HOME}/.clearml/cache,target=/workspace/home/.clearml/cache,type=bind,consistency=cached",
+    ]
+}

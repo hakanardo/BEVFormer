@@ -1,0 +1,6 @@
+pylint
+pyglet
+torch-tb-profiler
+pytest
+# ipython==8.12
+ipython
