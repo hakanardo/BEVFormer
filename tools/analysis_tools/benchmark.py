@@ -75,7 +75,29 @@ def main():
         torch.cuda.synchronize()
         start_time = time.perf_counter()
         with torch.no_grad():
-            model(return_loss=False, rescale=True, **data)
+            result = model(return_loss=False, rescale=True, **data)
+
+        from vi3o.image import imwrite, ptpscale
+        import cv2
+        import numpy as np
+        img = data['img'][0].data[0][0,0]
+        meta = data['img_metas'][0].data[0][0]
+        bbox = result[0]['pts_bbox']
+        mask = bbox['scores_3d'] > 0.5
+        bbox['labels_3d'][mask]
+        pkt = bbox['boxes_3d'].center[mask]
+        proj = (torch.hstack([pkt, torch.ones(pkt.shape[0], 1)]).numpy() @ meta['lidar2img'][0].T)
+        mask2 = proj[:, 2] > 1e-3
+        proj = proj[mask2]
+        proj = proj[:, :2] / proj[:, 2:3]
+        classes = [dataset.CLASSES[i] for i in bbox['labels_3d'][mask][mask2]]
+
+        drw = ptpscale(img.detach().cpu().numpy().transpose([1, 2, 0]).copy())
+        for (x, y), c in zip(proj, classes):
+            col = {'pedestrian': (255,0,0), 'car': (0,255,0)}[c]
+            cv2.circle(drw, (int(x), int(y)), 5, col, -1)
+        imwrite(drw, "t.png")
+
 
         torch.cuda.synchronize()
         elapsed = time.perf_counter() - start_time
