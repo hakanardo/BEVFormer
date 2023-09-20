@@ -4,6 +4,10 @@ import mmcv
 from mmcv import Config
 
 from mmdet3d.datasets import build_dataset
+import sys
+sys.path.append('.')
+from projects.mmdet3d_plugin.datasets import custom_build_dataset
+
 
 
 def parse_args():
@@ -29,14 +33,14 @@ def main():
     cfg.data.test.test_mode = True
 
     # build the dataset
-    dataset = build_dataset(cfg.data.test)
+    dataset = custom_build_dataset(cfg.data.test)
     results = mmcv.load(args.result)
 
     if getattr(dataset, 'show', None) is not None:
         # data loading pipeline for showing
         eval_pipeline = cfg.get('eval_pipeline', {})
         if eval_pipeline:
-            dataset.show(results, args.show_dir, pipeline=eval_pipeline)
+            dataset.show(results, args.show_dir, pipeline=eval_pipeline) #, show=False)
         else:
             dataset.show(results, args.show_dir)  # use default pipeline
     else:
